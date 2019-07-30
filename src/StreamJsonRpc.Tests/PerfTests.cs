@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
 using Nerdbank;
 using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -74,8 +75,8 @@ public class PerfTests
     public async Task BurstNotifyMessages(Stream serverStream, Stream clientStream)
     {
         var notifyServer = new NotifyServer();
-        using (var serverRpc = JsonRpc.Attach(serverStream, notifyServer))
-        using (var clientRpc = JsonRpc.Attach(clientStream))
+        using (var serverRpc = JsonMessageFormatter.Attach(serverStream, notifyServer))
+        using (var clientRpc = JsonMessageFormatter.Attach(clientStream))
         {
             serverRpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);
             clientRpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);
@@ -116,8 +117,8 @@ public class PerfTests
     public async Task BurstInvokeMessages(Stream serverStream, Stream clientStream)
     {
         var server = new Server();
-        using (var serverRpc = JsonRpc.Attach(serverStream, server))
-        using (var clientRpc = JsonRpc.Attach(clientStream))
+        using (var serverRpc = JsonMessageFormatter.Attach(serverStream, server))
+        using (var clientRpc = JsonMessageFormatter.Attach(clientStream))
         {
             serverRpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);
             clientRpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);

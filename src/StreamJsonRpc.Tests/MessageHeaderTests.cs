@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,7 +34,7 @@ public class MessageHeaderTests : TestBase
     [Fact]
     public async Task HeaderEmitted()
     {
-        var clientRpc = JsonRpc.Attach(this.clientStream);
+        var clientRpc = JsonMessageFormatter.Attach(this.clientStream);
         this.TimeoutToken.Register(clientRpc.Dispose);
 
         await clientRpc.NotifyAsync("someMethod");
@@ -83,7 +84,7 @@ public class MessageHeaderTests : TestBase
     public async Task ReceiveMessageWithEncoding(string encodingName)
     {
         var server = new Server();
-        var rpcServer = JsonRpc.Attach(this.serverStream, server);
+        var rpcServer = JsonMessageFormatter.Attach(this.serverStream, server);
 
         Encoding contentEncoding = Encoding.GetEncoding(encodingName);
         string jsonMessage = @"{""jsonrpc"":""2.0"",""method"":""Foo"",""id"":1}";
@@ -108,7 +109,7 @@ public class MessageHeaderTests : TestBase
     [MemberData(nameof(TestedEncodings))]
     public async Task SendMessageWithEncoding(string encodingName)
     {
-        var messageHandler = new HeaderDelimitedMessageHandler(this.clientStream, this.clientStream);
+        var messageHandler = new HeaderDelimitedMessageHandler(this.clientStream, this.clientStream, new JsonMessageFormatter());
         var rpcClient = new JsonRpc(messageHandler);
         messageHandler.Encoding = Encoding.GetEncoding(encodingName);
         await rpcClient.NotifyAsync("Foo");

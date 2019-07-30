@@ -12,7 +12,7 @@ variables:
 
 jobs:
 - job: Windows
-  pool: Hosted Windows 2019 with VS2019
+  pool: Hosted VS2017
   steps:
   - template: azure-pipelines/build.yml
 

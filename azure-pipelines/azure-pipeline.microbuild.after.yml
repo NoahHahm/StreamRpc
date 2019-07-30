@@ -34,7 +34,7 @@ steps:
 
 - powershell: |
     $DllPaths = @(
-        ,"bin\StreamJsonRpc\$(BuildConfiguration)\StreamJsonRpc.dll"
+        ,"bin\StreamRpc\$(BuildConfiguration)\StreamRpc.dll"
     )
     Get-ChildItem $DllPaths -rec |% {
         $OutputDir = "$($_.Directory.FullName)\symstore"
@@ -48,8 +48,8 @@ steps:
   inputs:
     SourceFolder: bin
     Contents: |
-      StreamJsonRpc/$(BuildConfiguration)/**/StreamJsonRpc.dll
-      StreamJsonRpc/$(BuildConfiguration)/**/symstore/StreamJsonRpc.pdb
+      StreamRpc/$(BuildConfiguration)/**/StreamRpc.dll
+      StreamRpc/$(BuildConfiguration)/**/symstore/StreamRpc.pdb
     TargetFolder: $(Build.ArtifactStagingDirectory)/symbols
   displayName: Collecting symbols artifacts
 

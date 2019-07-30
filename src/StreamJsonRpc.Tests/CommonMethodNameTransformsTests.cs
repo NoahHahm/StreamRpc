@@ -3,6 +3,7 @@
 
 using System;
 using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 
 public class CommonMethodNameTransformsTests

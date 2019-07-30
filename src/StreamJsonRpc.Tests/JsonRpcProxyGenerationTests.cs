@@ -2,12 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
 using Nerdbank;
-using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -637,10 +638,10 @@ public class JsonRpcProxyGenerationTests : TestBase
 
         public Task<string> ARoseByAsync(string name) => Task.FromResult(name.ToUpperInvariant());
 
-        public async Task<int> SumOfParameterObject(Newtonsoft.Json.Linq.JToken paramObject, CancellationToken cancellationToken)
+        public async Task<int> SumOfParameterObject(int a, int b, CancellationToken cancellationToken)
         {
             this.MethodEntered.Set();
-            int sum = paramObject.Value<int>("a") + paramObject.Value<int>("b");
+            int sum = a + b;
             this.MethodResult.SetResult(sum);
             await this.ResumeMethod.WaitAsync().WithCancellation(cancellationToken);
             return sum;

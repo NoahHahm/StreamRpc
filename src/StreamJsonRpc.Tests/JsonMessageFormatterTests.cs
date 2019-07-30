@@ -7,7 +7,8 @@ using System.Text;
 using Nerdbank.Streams;
 using Newtonsoft.Json;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 

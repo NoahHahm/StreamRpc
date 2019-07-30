@@ -14,7 +14,8 @@ using Nerdbank;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,7 +23,7 @@ public class StreamMessageHandlerTests : TestBase
 {
     private readonly MemoryStream sendingStream = new MemoryStream();
     private readonly MemoryStream receivingStream = new MemoryStream();
-    private DirectMessageHandler handler;
+    private readonly DirectMessageHandler handler;
 
     public StreamMessageHandlerTests(ITestOutputHelper logger)
         : base(logger)
@@ -40,7 +41,7 @@ public class StreamMessageHandlerTests : TestBase
     [Fact]
     public async Task Ctor_AcceptsNullSendingStream()
     {
-        var handler = new MyStreamMessageHandler(null, this.receivingStream, new JsonMessageFormatter());
+        var handler = new MyStreamMessageHandler(null, this.receivingStream, new MessagePackFormatter());
         Assert.True(handler.CanRead);
         Assert.False(handler.CanWrite);
 
@@ -54,7 +55,7 @@ public class StreamMessageHandlerTests : TestBase
     [Fact]
     public async Task Ctor_AcceptsNullReceivingStream()
     {
-        var handler = new MyStreamMessageHandler(this.sendingStream, null, new JsonMessageFormatter());
+        var handler = new MyStreamMessageHandler(this.sendingStream, null, new MessagePackFormatter());
         Assert.False(handler.CanRead);
         Assert.True(handler.CanWrite);
 
@@ -68,7 +69,7 @@ public class StreamMessageHandlerTests : TestBase
     [Fact]
     public void IsDisposed()
     {
-        IDisposableObservable observable = this.handler;
+        IHasIsDisposed observable = this.handler;
         Assert.False(observable.IsDisposed);
         this.handler.Dispose();
         Assert.True(observable.IsDisposed);
@@ -78,7 +79,7 @@ public class StreamMessageHandlerTests : TestBase
     public void Dispose_StreamsAreDisposed()
     {
         var streams = FullDuplexStream.CreateStreams();
-        var handler = new MyStreamMessageHandler(streams.Item1, streams.Item2, new JsonMessageFormatter());
+        var handler = new MyStreamMessageHandler(streams.Item1, streams.Item2, new MessagePackFormatter());
         Assert.False(streams.Item1.IsDisposed);
         Assert.False(streams.Item2.IsDisposed);
         handler.Dispose();
@@ -113,7 +114,7 @@ public class StreamMessageHandlerTests : TestBase
     [Fact]
     public async Task WriteAsync_PreferOperationCanceledException_MidExecution()
     {
-        var handler = new DelayedWriter(this.sendingStream, this.receivingStream, new JsonMessageFormatter());
+        var handler = new DelayedWriter(this.sendingStream, this.receivingStream, new MessagePackFormatter());
 
         var cts = new CancellationTokenSource();
         var writeTask = handler.WriteAsync(CreateRequestMessage(), cts.Token);
@@ -134,7 +135,7 @@ public class StreamMessageHandlerTests : TestBase
     [Fact]
     public async Task WriteAsync_SemaphoreIncludesWriteCoreAsync_Task()
     {
-        var handler = new DelayedWriter(this.sendingStream, this.receivingStream, new JsonMessageFormatter());
+        var handler = new DelayedWriter(this.sendingStream, this.receivingStream, new MessagePackFormatter());
         var writeTask = handler.WriteAsync(CreateRequestMessage(), CancellationToken.None).AsTask();
         var write2Task = handler.WriteAsync(CreateRequestMessage(), CancellationToken.None).AsTask();
 

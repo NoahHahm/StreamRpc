@@ -1,0 +1,31 @@
+version: '{build}'
+branches:
+  only:
+  - master
+  - /^v\d+(?:\.\d+)?$/
+  - /[\b_]validate\b/
+skip_tags: true
+skip_commits:
+  files:
+  - doc/*
+  - README.md
+  - .vsts-ci.yml
+  - .travis.yml
+nuget:
+  disable_publish_on_pr: true
+image: Visual Studio 2017
+configuration: Release
+environment:
+  VisualStudioVersion: 15.0
+before_build:
+- dotnet --info
+- msbuild src\StreamRpc.sln /nologo /m /v:quiet /t:restore
+build_script:
+- msbuild src\StreamRpc.sln /nologo /m /fl /v:minimal /t:build,pack
+test_script:
+- cmd: >-
+    dotnet test .\src\StreamJsonRpc.Tests\StreamJsonRpc.Tests.csproj --no-build --filter "TestCategory!=FailsInCloudTest"
+
+artifacts:
+- path: bin\**\*.nupkg
+  name: NuGet Package

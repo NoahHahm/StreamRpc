@@ -13,10 +13,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Authors>Microsoft</Authors>
-    <Owners>Microsoft, VisualStudioExtensibility</Owners>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageProjectUrl>https://github.com/Microsoft/vs-streamjsonrpc</PackageProjectUrl>
+    <Authors>Andreia Gaita, Microsoft</Authors>
+    <Owners>Andreia Gaita, Microsoft, VisualStudioExtensibility</Owners>
+    <Copyright>© Andreia Gaita, © Microsoft Corporation. All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/shana/StreamRpc</PackageProjectUrl>
     <PackageIconUrl>https://aka.ms/VsExtensibilityIcon</PackageIconUrl>
 
     <MicroBuildPackageVersion>2.0.55</MicroBuildPackageVersion>

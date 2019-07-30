@@ -8,6 +8,7 @@ namespace Benchmarks
     using BenchmarkDotNet.Attributes;
     using Nerdbank.Streams;
     using StreamJsonRpc;
+    using StreamRpc;
 
     [MemoryDiagnoser]
     public class InvokeBenchmarks
@@ -18,10 +19,10 @@ namespace Benchmarks
         public InvokeBenchmarks()
         {
             var duplex = FullDuplexStream.CreatePipePair();
-            this.clientRpc = new JsonRpc(new HeaderDelimitedMessageHandler(duplex.Item1, new JsonMessageFormatter()));
+            this.clientRpc = new JsonRpc(new HeaderDelimitedMessageHandler(duplex.Item1, new MessagePackFormatter()));
             this.clientRpc.StartListening();
 
-            this.serverRpc = new JsonRpc(new HeaderDelimitedMessageHandler(duplex.Item2, new JsonMessageFormatter()));
+            this.serverRpc = new JsonRpc(new HeaderDelimitedMessageHandler(duplex.Item2, new MessagePackFormatter()));
             this.serverRpc.AddLocalRpcTarget(new Server());
             this.serverRpc.StartListening();
         }

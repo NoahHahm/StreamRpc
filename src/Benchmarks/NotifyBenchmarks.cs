@@ -8,6 +8,7 @@ namespace Benchmarks
     using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
     using StreamJsonRpc;
+    using StreamRpc;
 
     [MemoryDiagnoser]
     public class NotifyBenchmarks
