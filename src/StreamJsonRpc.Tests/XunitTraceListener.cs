@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit.Abstractions;
 
 internal class XunitTraceListener : TraceListener

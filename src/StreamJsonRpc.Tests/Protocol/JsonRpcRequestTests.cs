@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 
 public class JsonRpcRequestTests

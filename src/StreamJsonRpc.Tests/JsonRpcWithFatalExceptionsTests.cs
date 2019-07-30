@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -56,9 +58,9 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         Assert.Equal(0, this.serverRpc.IsFatalExceptionCount);
 
         // Assert that the JsonRpc and MessageHandler objects are not disposed
-        Assert.False(((IDisposableObservable)this.clientRpc).IsDisposed);
-        Assert.False(((IDisposableObservable)this.serverRpc).IsDisposed);
-        Assert.False(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.clientRpc).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.serverRpc).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
     }
 
     [Fact]
@@ -70,8 +72,8 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         Assert.Equal(exceptionMessage, this.serverRpc.FaultException.Message);
         Assert.Equal(1, this.serverRpc.IsFatalExceptionCount);
 
-        Assert.True(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
-        Assert.True(((IDisposableObservable)this.serverMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.serverMessageHandler).IsDisposed);
         Assert.False(this.clientRpc.IsDisposed);
         Assert.False(this.serverRpc.IsDisposed);
     }
@@ -85,8 +87,8 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         Assert.Equal(exceptionMessage, this.serverRpc.FaultException.Message);
         Assert.Equal(1, this.serverRpc.IsFatalExceptionCount);
 
-        Assert.True(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
-        Assert.True(((IDisposableObservable)this.serverMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.serverMessageHandler).IsDisposed);
         Assert.False(this.clientRpc.IsDisposed);
         Assert.False(this.serverRpc.IsDisposed);
     }
@@ -100,8 +102,8 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         Assert.Equal(exceptionMessage, this.serverRpc.FaultException.Message);
         Assert.Equal(1, this.serverRpc.IsFatalExceptionCount);
 
-        Assert.True(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
-        Assert.True(((IDisposableObservable)this.serverMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.serverMessageHandler).IsDisposed);
         Assert.False(this.clientRpc.IsDisposed);
         Assert.False(this.serverRpc.IsDisposed);
     }
@@ -114,8 +116,8 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         Assert.Equal(exceptionMessage, this.serverRpc.FaultException.Message);
         Assert.Equal(1, this.serverRpc.IsFatalExceptionCount);
 
-        Assert.True(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
-        Assert.True(((IDisposableObservable)this.serverMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.serverMessageHandler).IsDisposed);
         Assert.False(this.clientRpc.IsDisposed);
         Assert.False(this.serverRpc.IsDisposed);
     }
@@ -126,7 +128,7 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         await Assert.ThrowsAsync<RemoteMethodNotFoundException>(() => this.clientRpc.InvokeAsync("missingMethod", 50));
 
         // Assert MessageHandler object is not disposed
-        Assert.False(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
     }
 
     [Fact]
@@ -144,9 +146,9 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
         }
 
         // Assert that the JsonRpc and MessageHandler objects are not disposed
-        Assert.False(((IDisposableObservable)this.clientRpc).IsDisposed);
-        Assert.False(((IDisposableObservable)this.serverRpc).IsDisposed);
-        Assert.False(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.clientRpc).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.serverRpc).IsDisposed);
+        Assert.False(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
     }
 
     [Fact]
@@ -167,8 +169,8 @@ public class JsonRpcWithFatalExceptionsTests : TestBase
             Assert.Equal(1, this.serverRpc.IsFatalExceptionCount);
         }
 
-        Assert.True(((IDisposableObservable)this.clientMessageHandler).IsDisposed);
-        Assert.True(((IDisposableObservable)this.serverMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.clientMessageHandler).IsDisposed);
+        Assert.True(((IHasIsDisposed)this.serverMessageHandler).IsDisposed);
         Assert.False(this.clientRpc.IsDisposed);
         Assert.False(this.serverRpc.IsDisposed);
     }

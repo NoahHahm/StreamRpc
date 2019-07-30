@@ -12,7 +12,8 @@ using Microsoft.VisualStudio.Threading;
 using Nerdbank.Streams;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -39,14 +40,6 @@ public class HeaderDelimitedMessageHandlerTests : TestBase
         var sr = new StreamReader(this.sendingStream, this.handler.Encoding);
         string writtenContent = sr.ReadToEnd();
         Assert.Contains(this.handler.SubType, writtenContent);
-    }
-
-    [Fact]
-    public void EncodingThrowsForNonTextFormatters()
-    {
-        this.handler = new HeaderDelimitedMessageHandler(this.sendingStream.UseStrictPipeWriter(), this.receivingStream.UseStrictPipeReader(), new MockFormatter());
-        Assert.Throws<NotSupportedException>(() => this.handler.Encoding);
-        Assert.Throws<NotSupportedException>(() => this.handler.Encoding = Encoding.UTF8);
     }
 
     [Fact]

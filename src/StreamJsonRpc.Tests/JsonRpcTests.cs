@@ -19,7 +19,8 @@ using Nerdbank.Streams;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -143,12 +144,8 @@ public abstract class JsonRpcTests : TestBase
         this.serverStream = streams.Item1;
         this.clientStream = streams.Item2;
 
-        this.serverRpc = new JsonRpc(this.serverStream);
-        this.serverRpc.AddLocalRpcTarget(this.server);
-        this.serverRpc.StartListening();
-
-        this.clientRpc = new JsonRpc(new HeaderDelimitedMessageHandler(this.clientStream, new JsonMessageFormatter()));
-        this.clientRpc.StartListening();
+        this.serverRpc = JsonRpc.Attach(this.serverStream, this.server);
+        this.clientRpc = JsonRpc.Attach(this.clientStream);
 
         string result = await this.clientRpc.InvokeAsync<string>(nameof(Server.AsyncMethod), "hi");
         Assert.Equal("hi!", result);

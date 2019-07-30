@@ -14,13 +14,12 @@ namespace StreamJsonRpc
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft;
     using Nerdbank.Streams;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using StreamJsonRpc.Protocol;
+    using StreamRpc;
+    using StreamRpc.Protocol;
 
     /// <summary>
     /// Uses Newtonsoft.Json serialization to serialize <see cref="JsonRpcMessage"/> as JSON (text).
@@ -141,6 +140,49 @@ namespace StreamJsonRpc
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
         };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
+        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="MessagePackFormatter"/>, and immediately starts listening.
+        /// </summary>
+        /// <param name="stream">A bidirectional stream to send and receive RPC messages on.</param>
+        /// <param name="target">An optional target object to invoke when incoming RPC requests arrive.</param>
+        /// <returns>The initialized and listening <see cref="JsonRpc"/> object.</returns>
+        public static JsonRpc Attach(Stream stream, object target = null) => Attach(stream, stream, target);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
+        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="JsonMessageFormatter"/>, and immediately starts listening.
+        /// </summary>
+        /// <param name="sendingStream">The stream used to transmit messages. May be null.</param>
+        /// <param name="receivingStream">The stream used to receive messages. May be null.</param>
+        /// <param name="target">An optional target object to invoke when incoming RPC requests arrive.</param>
+        /// <returns>The initialized and listening <see cref="JsonRpc"/> object.</returns>
+        public static JsonRpc Attach(Stream sendingStream, Stream receivingStream, object target = null)
+        {
+            if (sendingStream == null && receivingStream == null)
+            {
+                throw new ArgumentException(Resources.BothReadableWritableAreNull);
+            }
+
+            var rpc = new JsonRpc(new HeaderDelimitedMessageHandler(sendingStream, receivingStream, new JsonMessageFormatter()), target);
+            try
+            {
+                if (receivingStream != null)
+                {
+                    rpc.StartListening();
+                }
+
+                return rpc;
+            }
+            catch
+            {
+                rpc.Dispose();
+                throw;
+            }
+        }
+
         /// <inheritdoc/>
         public JsonRpcMessage Deserialize(ReadOnlySequence<byte> contentBuffer) => this.Deserialize(contentBuffer, this.Encoding);
 
@@ -235,7 +277,7 @@ namespace StreamJsonRpc
             var json = JToken.FromObject(message, DefaultSerializer);
 
             // Fix up dropped fields that are mandatory
-            if (message is Protocol.JsonRpcResult && json["result"] == null)
+            if (message is StreamRpc.Protocol.JsonRpcResult && json["result"] == null)
             {
                 json["result"] = JValue.CreateNull();
             }
@@ -352,7 +394,7 @@ namespace StreamJsonRpc
         /// <param name="jsonRpcMessage">A JSON-RPC message.</param>
         private void TokenizeUserData(JsonRpcMessage jsonRpcMessage)
         {
-            if (jsonRpcMessage is Protocol.JsonRpcRequest request)
+            if (jsonRpcMessage is StreamRpc.Protocol.JsonRpcRequest request)
             {
                 if (request.ArgumentsList != null)
                 {
@@ -370,7 +412,7 @@ namespace StreamJsonRpc
                     request.Arguments = paramsObject;
                 }
             }
-            else if (jsonRpcMessage is Protocol.JsonRpcResult result)
+            else if (jsonRpcMessage is StreamRpc.Protocol.JsonRpcResult result)
             {
                 result.Result = this.TokenizeUserData(result.Result);
             }
@@ -453,7 +495,7 @@ namespace StreamJsonRpc
 
         [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
         [DataContract]
-        private class JsonRpcRequest : Protocol.JsonRpcRequest
+        private class JsonRpcRequest : StreamRpc.Protocol.JsonRpcRequest
         {
             private readonly JsonSerializer jsonSerializer;
 
@@ -502,7 +544,7 @@ namespace StreamJsonRpc
 
         [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
         [DataContract]
-        private class JsonRpcResult : Protocol.JsonRpcResult
+        private class JsonRpcResult : StreamRpc.Protocol.JsonRpcResult
         {
             private readonly JsonSerializer jsonSerializer;
 

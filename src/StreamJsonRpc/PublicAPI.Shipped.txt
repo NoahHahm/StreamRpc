@@ -115,20 +115,6 @@ StreamJsonRpc.IJsonRpcMessageTextFormatter
 StreamJsonRpc.IJsonRpcMessageTextFormatter.Deserialize(System.Buffers.ReadOnlySequence<byte> contentBuffer, System.Text.Encoding encoding) -> StreamJsonRpc.Protocol.JsonRpcMessage
 StreamJsonRpc.IJsonRpcMessageTextFormatter.Encoding.get -> System.Text.Encoding
 StreamJsonRpc.IJsonRpcMessageTextFormatter.Encoding.set -> void
-StreamJsonRpc.JsonMessageFormatter
-StreamJsonRpc.JsonMessageFormatter.Deserialize(Newtonsoft.Json.Linq.JToken json) -> StreamJsonRpc.Protocol.JsonRpcMessage
-StreamJsonRpc.JsonMessageFormatter.Deserialize(System.Buffers.ReadOnlySequence<byte> contentBuffer) -> StreamJsonRpc.Protocol.JsonRpcMessage
-StreamJsonRpc.JsonMessageFormatter.Deserialize(System.Buffers.ReadOnlySequence<byte> contentBuffer, System.Text.Encoding encoding) -> StreamJsonRpc.Protocol.JsonRpcMessage
-StreamJsonRpc.JsonMessageFormatter.Encoding.get -> System.Text.Encoding
-StreamJsonRpc.JsonMessageFormatter.Encoding.set -> void
-StreamJsonRpc.JsonMessageFormatter.ProtocolVersion.get -> System.Version
-StreamJsonRpc.JsonMessageFormatter.ProtocolVersion.set -> void
-StreamJsonRpc.JsonMessageFormatter.GetJsonText(StreamJsonRpc.Protocol.JsonRpcMessage message) -> object
-StreamJsonRpc.JsonMessageFormatter.JsonMessageFormatter() -> void
-StreamJsonRpc.JsonMessageFormatter.JsonMessageFormatter(System.Text.Encoding encoding) -> void
-StreamJsonRpc.JsonMessageFormatter.JsonSerializer.get -> Newtonsoft.Json.JsonSerializer
-StreamJsonRpc.JsonMessageFormatter.Serialize(StreamJsonRpc.Protocol.JsonRpcMessage message) -> Newtonsoft.Json.Linq.JToken
-StreamJsonRpc.JsonMessageFormatter.Serialize(System.Buffers.IBufferWriter<byte> contentBuffer, StreamJsonRpc.Protocol.JsonRpcMessage message) -> void
 StreamJsonRpc.JsonRpc.InvokeCoreAsync<TResult>(long? id, string targetName, System.Collections.Generic.IReadOnlyList<object> arguments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
 StreamJsonRpc.JsonRpc.InvokeCoreAsync<TResult>(long? id, string targetName, System.Collections.Generic.IReadOnlyList<object> arguments, System.Threading.CancellationToken cancellationToken, bool isParameterObject) -> System.Threading.Tasks.Task<TResult>
 StreamJsonRpc.JsonRpc.IsDisposed.get -> bool
@@ -154,9 +140,6 @@ StreamJsonRpc.JsonRpc.TraceEvents.RequestReceived = 6 -> StreamJsonRpc.JsonRpc.T
 StreamJsonRpc.JsonRpc.TraceEvents.RequestWithoutMatchingTarget = 5 -> StreamJsonRpc.JsonRpc.TraceEvents
 StreamJsonRpc.JsonRpc.TraceSource.get -> System.Diagnostics.TraceSource
 StreamJsonRpc.JsonRpc.TraceSource.set -> void
-StreamJsonRpc.JsonRpcDisconnectedEventArgs.JsonRpcDisconnectedEventArgs(string description, StreamJsonRpc.DisconnectedReason reason, Newtonsoft.Json.Linq.JToken lastMessage) -> void
-StreamJsonRpc.JsonRpcDisconnectedEventArgs.JsonRpcDisconnectedEventArgs(string description, StreamJsonRpc.DisconnectedReason reason, Newtonsoft.Json.Linq.JToken lastMessage, System.Exception exception) -> void
-StreamJsonRpc.JsonRpcDisconnectedEventArgs.LastMessage.get -> Newtonsoft.Json.Linq.JToken
 StreamJsonRpc.LengthHeaderMessageHandler
 StreamJsonRpc.LengthHeaderMessageHandler.LengthHeaderMessageHandler(System.IO.Pipelines.IDuplexPipe pipe, StreamJsonRpc.IJsonRpcMessageFormatter formatter) -> void
 StreamJsonRpc.LengthHeaderMessageHandler.LengthHeaderMessageHandler(System.IO.Pipelines.PipeWriter writer, System.IO.Pipelines.PipeReader reader, StreamJsonRpc.IJsonRpcMessageFormatter formatter) -> void

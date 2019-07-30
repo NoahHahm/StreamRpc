@@ -14,9 +14,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net471;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
+    <CodeAnalysisRuleSet>StreamRpc.ruleset</CodeAnalysisRuleSet>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <Description>A fork of StreamJsonRPC, a cross-platform .NET portable library that implements the JSON-RPC wire protocol, with minimal dependencies and a MessagePack serializer.</Description>
+    <PackageTags>visualstudio unity messagepack stream json rpc</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="1.7.3.7" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.0.102" PrivateAssets="all" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.3" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="Roslyn.Diagnostics.Analyzers" Version="2.9.3" PrivateAssets="all" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.2" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.5.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Resources.??*.resx">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <Generator />
+    </EmbeddedResource>
+  </ItemGroup>
+  <Target Name="FilterOutNetStandardStuff" BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <Filtered Include="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FullPath)').Contains('Microsoft.NET.Build.Extensions'))" />
+      <ReferenceCopyLocalPaths Remove="@(Filtered)" />
+    </ItemGroup>
+  </Target>
+</Project>

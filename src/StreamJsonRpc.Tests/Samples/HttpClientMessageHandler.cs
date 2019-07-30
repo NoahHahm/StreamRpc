@@ -14,7 +14,8 @@ using Microsoft;
 using Microsoft.VisualStudio.Threading;
 using Nerdbank.Streams;
 using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
+using StreamRpc;
+using StreamRpc.Protocol;
 
 /// <summary>
 /// A <see cref="IJsonRpcMessageHandler"/> that sends requests and receives responses over HTTP using <see cref="HttpClient"/>.

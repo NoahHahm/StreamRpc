@@ -8,17 +8,11 @@
     <LangVersion>7.3</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <Company>Microsoft</Company>
-    <Authors>Microsoft</Authors>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-
-    <PackageProjectUrl>https://github.com/Microsoft/vs-streamjsonrpc</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Authors>Andreia Gaita, Microsoft</Authors>
+    <Owners>Andreia Gaita, Microsoft, VisualStudioExtensibility</Owners>
+    <Copyright>© Andreia Gaita, © Microsoft Corporation. All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/shana/StreamRpc</PackageProjectUrl>
     <PackageIconUrl>https://aka.ms/VsExtensibilityIcon</PackageIconUrl>
 
     <MicroBuildPackageVersion>2.0.55</MicroBuildPackageVersion>

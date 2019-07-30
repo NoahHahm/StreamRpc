@@ -5,17 +5,14 @@ namespace StreamJsonRpc
 {
     using System;
     using System.Buffers;
-    using System.IO;
     using System.Net.WebSockets;
     using System.Runtime.InteropServices;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft;
     using Nerdbank.Streams;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using StreamJsonRpc.Protocol;
+    using StreamRpc;
+    using StreamRpc.Protocol;
 
     /// <summary>
     /// A message handler for the <see cref="JsonRpc"/> class
@@ -27,14 +24,14 @@ namespace StreamJsonRpc
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketMessageHandler"/> class
-        /// that uses the <see cref="JsonMessageFormatter"/> to serialize messages as textual JSON.
+        /// that uses the <see cref="MessagePackFormatter"/> to serialize messages.
         /// </summary>
         /// <param name="webSocket">
         /// The <see cref="System.Net.WebSockets.WebSocket"/> used to communicate.
         /// This will <em>not</em> be automatically disposed of with this <see cref="WebSocketMessageHandler"/>.
         /// </param>
         public WebSocketMessageHandler(WebSocket webSocket)
-            : this(webSocket, new JsonMessageFormatter())
+            : this(webSocket, new MessagePackFormatter())
         {
         }
 

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -62,7 +63,6 @@ public class JsonRpcRawStreamTests : TestBase
             Assert.NotNull(args);
             Assert.NotNull(args.Description);
             Assert.Equal(DisconnectedReason.ParseError, args.Reason);
-            Assert.Null(args.LastMessage);
             Assert.NotNull(args.Exception);
 
             // Server must dispose the stream now

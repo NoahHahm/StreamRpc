@@ -1,14 +1,11 @@
 parameters:
   windowsPool: Hosted Windows 2019 with VS2019
 
-jobs:
-- job: Windows
-  pool: ${{ parameters.windowsPool }}
-  steps:
-  - checkout: self
-    clean: true
-  - template: clear-packagecaches.yml
-  - template: install-dependencies.yml
+- task: UseDotNet@2
+  displayName: Install .NET Core SDK 2.2.108
+  inputs:
+    packageType: sdk
+    version: 2.2.108
 
   - powershell: '& (./azure-pipelines/Get-nbgv.ps1) cloud -p src'
     displayName: Set build number
@@ -39,13 +36,35 @@ jobs:
   - template: install-dependencies.yml
   - template: dotnet.yml
 
-- job: WrapUp
-  dependsOn:
-  - Windows
-  - Linux
-  - macOS
-  pool:
-    vmImage: Ubuntu 16.04
+# Use VSBuild to pack because `dotnet pack` can't sign packages with MicroBuild.
+- task: VSBuild@1
+  vsVersion: 15.0
+  inputs:
+    msbuildArgs: /t:build,pack /m /v:m /bl:"$(Build.ArtifactStagingDirectory)/build_logs/msbuild.binlog"
+    platform: $(BuildPlatform)
+    configuration: $(BuildConfiguration)
+  displayName: Build Visual Studio solution
+
+- task: PowerShell@2
+  inputs:
+    filePath: azure-pipelines\artifacts\VSInsertion.ps1
+    failOnStderr: true
+  displayName: Build VSInsertion CoreXT nupkg
+
+- task: DotNetCoreCLI@2
+  displayName: Run tests
+  inputs:
+    command: test
+    projects: src/**/*.Tests.csproj
+    arguments: --configuration $(BuildConfiguration) --no-build --filter "TestCategory!=FailsInCloudTest" -v n
+  condition: and(succeeded(), ne(variables['SignType'], 'real'))
+
+- task: CopyFiles@1
+  inputs:
+    Contents: |
+      obj/**/project.assets.json
+    TargetFolder: $(Build.ArtifactStagingDirectory)/projectAssetsJson
+  displayName: Collecting project.assets.json artifacts
   condition: succeededOrFailed()
   steps:
   - checkout: self

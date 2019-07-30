@@ -1,4 +1,5 @@
 ﻿using StreamJsonRpc;
+using StreamRpc;
 using Xunit;
 using Xunit.Abstractions;
 

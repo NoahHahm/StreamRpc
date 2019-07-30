@@ -6,6 +6,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
+using StreamRpc;
+using StreamRpc.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 

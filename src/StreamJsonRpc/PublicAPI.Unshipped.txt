@@ -4,7 +4,12 @@ StreamJsonRpc.IJsonRpcAsyncMessageTextFormatter
 StreamJsonRpc.IJsonRpcAsyncMessageTextFormatter.DeserializeAsync(System.IO.Pipelines.PipeReader reader, System.Text.Encoding encoding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<StreamJsonRpc.Protocol.JsonRpcMessage>
 StreamJsonRpc.IJsonRpcClientProxy
 StreamJsonRpc.IJsonRpcClientProxy.JsonRpc.get -> StreamJsonRpc.JsonRpc
-StreamJsonRpc.JsonMessageFormatter.DeserializeAsync(System.IO.Pipelines.PipeReader reader, System.Text.Encoding encoding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<StreamJsonRpc.Protocol.JsonRpcMessage>
-StreamJsonRpc.JsonMessageFormatter.DeserializeAsync(System.IO.Pipelines.PipeReader reader, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<StreamJsonRpc.Protocol.JsonRpcMessage>
+StreamJsonRpc.MessagePackFormatter
+StreamJsonRpc.MessagePackFormatter.Deserialize(System.Buffers.ReadOnlySequence<byte> contentBuffer) -> StreamJsonRpc.Protocol.JsonRpcMessage
+StreamJsonRpc.MessagePackFormatter.GetJsonText(StreamJsonRpc.Protocol.JsonRpcMessage message) -> object
+StreamJsonRpc.MessagePackFormatter.MessagePackFormatter() -> void
+StreamJsonRpc.MessagePackFormatter.MessagePackFormatter(bool compress) -> void
+StreamJsonRpc.MessagePackFormatter.Serialize(System.Buffers.IBufferWriter<byte> contentBuffer, StreamJsonRpc.Protocol.JsonRpcMessage message) -> void
 static StreamJsonRpc.JsonRpc.Attach<T>(StreamJsonRpc.IJsonRpcMessageHandler handler) -> T
 static StreamJsonRpc.JsonRpc.Attach<T>(StreamJsonRpc.IJsonRpcMessageHandler handler, StreamJsonRpc.JsonRpcProxyOptions options) -> T
+static StreamJsonRpc.MessagePackFormatter.ToString(object obj) -> string
