@@ -49,7 +49,7 @@
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StreamJsonRpc\StreamJsonRpc.csproj" />
+    <ProjectReference Include="..\StreamJsonRpc\StreamRpc.Json.csproj" />
     <ProjectReference Include="..\StreamRpc\StreamRpc.csproj" />
   </ItemGroup>
   <ItemGroup>
