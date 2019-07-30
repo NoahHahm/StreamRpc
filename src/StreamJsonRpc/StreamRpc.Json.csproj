@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
-    <CodeAnalysisRuleSet>..\shipping.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworks>net471;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
+    <CodeAnalysisRuleSet>StreamJsonRpc.ruleset</CodeAnalysisRuleSet>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <Description>A cross-platform .NET portable library that implements the JSON-RPC wire protocol and can use System.IO.Stream or WebSocket so you can use it with any transport.</Description>
+    <Description>This package adds a Json formatter and web socket support to StreamRPC. StreamRPC is a fork of StreamJsonRPC, with minimal dependencies and a MessagePack serializer.</Description>
     <PackageTags>visualstudio stream json rpc</PackageTags>
   </PropertyGroup>
   <ItemGroup>

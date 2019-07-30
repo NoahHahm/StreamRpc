@@ -56,7 +56,7 @@
     <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StreamJsonRpc\StreamJsonRpc.csproj" />
+    <ProjectReference Include="..\StreamJsonRpc\StreamRpc.Json.csproj" />
     <ProjectReference Include="..\StreamRpc\StreamRpc.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StreamJsonRpc\StreamJsonRpc.csproj" />
+    <ProjectReference Include="..\StreamJsonRpc\StreamRpc.Json.csproj" />
     <ProjectReference Include="..\StreamRpc\StreamRpc.csproj" />
   </ItemGroup>
 </Project>
