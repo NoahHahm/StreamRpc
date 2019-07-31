@@ -122,7 +122,7 @@ namespace StreamRpc
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
-        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="LengthHeaderMessageHandler"/> around messages serialized using the
         /// <see cref="MessagePackFormatter"/>.
         /// </summary>
         /// <param name="stream">The full duplex stream used to transmit and receive messages.</param>
@@ -130,13 +130,13 @@ namespace StreamRpc
         /// It is important to call <see cref="StartListening"/> to begin receiving messages.
         /// </remarks>
         public JsonRpc(Stream stream)
-            : this(new HeaderDelimitedMessageHandler(Requires.NotNull(stream, nameof(stream)), stream, new MessagePackFormatter()))
+            : this(new LengthHeaderMessageHandler(Requires.NotNull(stream, nameof(stream)), stream, new MessagePackFormatter()))
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
-        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="LengthHeaderMessageHandler"/> around messages serialized using the
         /// <see cref="MessagePackFormatter"/>.
         /// </summary>
         /// <param name="sendingStream">The stream used to transmit messages. May be null.</param>
@@ -146,12 +146,8 @@ namespace StreamRpc
         /// It is important to call <see cref="StartListening"/> to begin receiving messages.
         /// </remarks>
         public JsonRpc(Stream sendingStream, Stream receivingStream, object target = null)
-            : this(new HeaderDelimitedMessageHandler(sendingStream, receivingStream, new MessagePackFormatter()))
+            : this(new LengthHeaderMessageHandler(sendingStream, receivingStream, new MessagePackFormatter()), target)
         {
-            if (target != null)
-            {
-                this.AddLocalRpcTarget(target);
-            }
         }
 
         /// <summary>
@@ -406,7 +402,7 @@ namespace StreamRpc
         /// <summary>
         /// Gets the message handler used to send and receive messages.
         /// </summary>
-        internal IJsonRpcMessageHandler MessageHandler { get; }
+        public IJsonRpcMessageHandler MessageHandler { get; }
 
         /// <summary>
         /// Gets a token that is cancelled when the connection is lost.
@@ -425,7 +421,7 @@ namespace StreamRpc
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
-        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="LengthHeaderMessageHandler"/> around messages serialized using the
         /// <see cref="MessagePackFormatter"/>, and immediately starts listening.
         /// </summary>
         /// <param name="stream">A bidirectional stream to send and receive RPC messages on.</param>
@@ -442,7 +438,7 @@ namespace StreamRpc
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRpc"/> class that uses
-        /// <see cref="HeaderDelimitedMessageHandler"/> around messages serialized using the
+        /// <see cref="LengthHeaderMessageHandler"/> around messages serialized using the
         /// <see cref="MessagePackFormatter"/>, and immediately starts listening.
         /// </summary>
         /// <param name="sendingStream">The stream used to transmit messages. May be null.</param>
@@ -457,32 +453,21 @@ namespace StreamRpc
             }
 
             var rpc = new JsonRpc(sendingStream, receivingStream, target);
-            try
-            {
-                if (receivingStream != null)
-                {
-                    rpc.StartListening();
-                }
-
-                return rpc;
-            }
-            catch
-            {
-                rpc.Dispose();
-                throw;
-            }
+            return ListenIfCanRead(rpc);
         }
 
         /// <summary>
         /// Creates a JSON-RPC client proxy that conforms to the specified server interface.
         /// </summary>
         /// <param name="handler">The message handler to use.</param>
+        /// <param name="target">An optional target object to invoke when incoming RPC requests arrive.</param>
         /// <returns>
-        /// An instance of the generated proxy.
+        /// An instance of the generated proxy. The underlying <see cref="JsonRpc"/> object will be initialized and listening.
         /// </returns>
-        public static JsonRpc Attach(IJsonRpcMessageHandler handler)
+        public static JsonRpc Attach(IJsonRpcMessageHandler handler, object target = null)
         {
-            return new JsonRpc(handler);
+            var rpc = new JsonRpc(handler, target);
+            return ListenIfCanRead(rpc);
         }
 
         /// <summary>
@@ -491,7 +476,7 @@ namespace StreamRpc
         /// <typeparam name="T">The interface that describes the functions available on the remote end.</typeparam>
         /// <param name="stream">The bidirectional stream used to send and receive JSON-RPC messages.</param>
         /// <returns>
-        /// An instance of the generated proxy.
+        /// An instance of the generated proxy. The underlying <see cref="JsonRpc"/> object will be initialized and listening.
         /// In addition to implementing <typeparamref name="T"/>, it also implements <see cref="IDisposable"/>
         /// and should be disposed of to close the connection.
         /// </returns>
@@ -518,8 +503,17 @@ namespace StreamRpc
             var proxyType = ProxyGeneration.Get(typeof(T).GetTypeInfo());
             var rpc = new JsonRpc(sendingStream, receivingStream);
             T proxy = (T)Activator.CreateInstance(proxyType.AsType(), rpc, JsonRpcProxyOptions.Default);
-            rpc.StartListening();
-            return proxy;
+            try
+            {
+                ListenIfCanRead(rpc);
+
+                return proxy;
+            }
+            catch
+            {
+                ((IDisposable)proxy).Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -528,7 +522,7 @@ namespace StreamRpc
         /// <typeparam name="T">The interface that describes the functions available on the remote end.</typeparam>
         /// <param name="handler">The message handler to use.</param>
         /// <returns>
-        /// An instance of the generated proxy.
+        /// An instance of the generated proxy. The underlying <see cref="JsonRpc"/> object will be initialized and listening.
         /// In addition to implementing <typeparamref name="T"/>, it also implements <see cref="IDisposable"/>
         /// and should be disposed of to close the connection.
         /// </returns>
@@ -545,7 +539,7 @@ namespace StreamRpc
         /// <param name="handler">The message handler to use.</param>
         /// <param name="options">A set of customizations for how the client proxy is wired up. If <c>null</c>, default options will be used.</param>
         /// <returns>
-        /// An instance of the generated proxy.
+        /// An instance of the generated proxy. The underlying <see cref="JsonRpc"/> object will be initialized and listening.
         /// In addition to implementing <typeparamref name="T"/>, it also implements <see cref="IDisposable"/>
         /// and should be disposed of to close the connection.
         /// </returns>
@@ -555,8 +549,17 @@ namespace StreamRpc
             var proxyType = ProxyGeneration.Get(typeof(T).GetTypeInfo());
             var rpc = new JsonRpc(handler);
             T proxy = (T)Activator.CreateInstance(proxyType.AsType(), rpc, options ?? JsonRpcProxyOptions.Default);
-            rpc.StartListening();
-            return proxy;
+            try
+            {
+                ListenIfCanRead(rpc);
+
+                return proxy;
+            }
+            catch
+            {
+                ((IDisposable)proxy).Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -2121,6 +2124,24 @@ namespace StreamRpc
         private void ThrowIfConfigurationLocked()
         {
             Verify.Operation(!this.HasListeningStarted || this.AllowModificationWhileListening, Resources.MustNotBeListening);
+        }
+
+        private static JsonRpc ListenIfCanRead(JsonRpc rpc)
+        {
+            try
+            {
+                if (rpc.MessageHandler.CanRead)
+                {
+                    rpc.StartListening();
+                }
+
+                return rpc;
+            }
+            catch
+            {
+                rpc.Dispose();
+                throw;
+            }
         }
 
         internal class MethodNameMap

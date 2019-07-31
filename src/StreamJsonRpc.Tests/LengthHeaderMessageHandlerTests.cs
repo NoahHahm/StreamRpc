@@ -29,12 +29,6 @@ public class LengthHeaderMessageHandlerTests : TestBase
     }
 
     [Fact]
-    public void Ctor_NullFormatter()
-    {
-        Assert.Throws<ArgumentNullException>(() => new LengthHeaderMessageHandler(new MemoryStream().UsePipe(), null));
-    }
-
-    [Fact]
     public void Ctor_NullWriter()
     {
         this.handler = new LengthHeaderMessageHandler(null, new MemoryStream().UsePipeReader(), new MessagePackFormatter());

@@ -58,10 +58,10 @@ public class SpecialCaseTests : TestBase
         }
     }
 
-    private class ThrowingMessageHandler : HeaderDelimitedMessageHandler
+    private class ThrowingMessageHandler : LengthHeaderMessageHandler
     {
         public ThrowingMessageHandler(Stream duplexStream)
-            : base(duplexStream)
+            : base(duplexStream.UsePipe())
         {
         }
 
