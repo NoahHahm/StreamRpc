@@ -37,4 +37,4 @@ deploy:
     secure: vF+hR2m3uTTUhrvJ2ER8Oox8SkWTZ4i56TY01k1NKfy5LWXEuAzmw5hlNcNSODTR
   skip_symbols: true
   symbol_server:           # remove to push symbols to SymbolSource.org
-  artifact: /.*\.nupkg/
+  artifact: /^(?!.*(\.Json)).*\.nupkg/
