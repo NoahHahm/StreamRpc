@@ -19,11 +19,6 @@ namespace StreamRpc
     public class LengthHeaderMessageHandler : PipeMessageHandler
     {
         /// <summary>
-        /// The formatter to use for message serialization.
-        /// </summary>
-        private readonly IJsonRpcMessageFormatter formatter;
-
-        /// <summary>
         /// A wrapper to use for the <see cref="PipeMessageHandler.Writer"/> when we need to count bytes written.
         /// </summary>
         private PrefixingBufferWriter<byte> prefixingWriter;
@@ -32,12 +27,10 @@ namespace StreamRpc
         /// Initializes a new instance of the <see cref="LengthHeaderMessageHandler"/> class.
         /// </summary>
         /// <param name="pipe">The reader and writer to use for receiving/transmitting messages.</param>
-        /// <param name="formatter">The formatter to use for message serialization.</param>
-        public LengthHeaderMessageHandler(IDuplexPipe pipe, IJsonRpcMessageFormatter formatter)
-            : base(pipe, formatter)
+        /// <param name="formatter">The formatter to use for message serialization. default is  MessagePackFormatter.</param>
+        public LengthHeaderMessageHandler(IDuplexPipe pipe, IJsonRpcMessageFormatter formatter = null)
+            : base(pipe, formatter ?? new MessagePackFormatter())
         {
-            Requires.NotNull(formatter, nameof(formatter));
-            this.formatter = formatter;
         }
 
         /// <summary>
@@ -45,12 +38,10 @@ namespace StreamRpc
         /// </summary>
         /// <param name="writer">The writer to use for transmitting messages.</param>
         /// <param name="reader">The reader to use for receiving messages.</param>
-        /// <param name="formatter">The formatter to use for message serialization.</param>
-        public LengthHeaderMessageHandler(PipeWriter writer, PipeReader reader, IJsonRpcMessageFormatter formatter)
-            : base(writer, reader, formatter)
+        /// <param name="formatter">The formatter to use for message serialization. default is  MessagePackFormatter.</param>
+        public LengthHeaderMessageHandler(PipeWriter writer, PipeReader reader, IJsonRpcMessageFormatter formatter = null)
+            : base(writer, reader, formatter ?? new MessagePackFormatter())
         {
-            Requires.NotNull(formatter, nameof(formatter));
-            this.formatter = formatter;
         }
 
         /// <summary>
@@ -58,12 +49,10 @@ namespace StreamRpc
         /// </summary>
         /// <param name="sendingStream">The stream to use for transmitting messages.</param>
         /// <param name="receivingStream">The stream to use for receiving messages.</param>
-        /// <param name="formatter">The formatter to use to serialize <see cref="JsonRpcMessage"/> instances.</param>
-        public LengthHeaderMessageHandler(Stream sendingStream, Stream receivingStream, IJsonRpcMessageFormatter formatter)
-            : base(sendingStream, receivingStream, formatter)
+        /// <param name="formatter">The formatter to use for message serialization. default is  MessagePackFormatter.</param>
+        public LengthHeaderMessageHandler(Stream sendingStream, Stream receivingStream, IJsonRpcMessageFormatter formatter = null)
+            : base(sendingStream, receivingStream, formatter ?? new MessagePackFormatter())
         {
-            Requires.NotNull(formatter, nameof(formatter));
-            this.formatter = formatter;
         }
 
         /// <inheritdoc/>
@@ -81,7 +70,7 @@ namespace StreamRpc
 
             readResult = await this.ReadAtLeastAsync(length, allowEmpty: false, cancellationToken).ConfigureAwait(false);
             ReadOnlySequence<byte> content = readResult.Buffer.Slice(0, length);
-            JsonRpcMessage message = this.formatter.Deserialize(content);
+            JsonRpcMessage message = this.Formatter.Deserialize(content);
             this.Reader.AdvanceTo(content.End);
             return message;
         }
@@ -95,7 +84,7 @@ namespace StreamRpc
             }
 
             // Write out the actual message content, counting all written bytes.
-            this.formatter.Serialize(this.prefixingWriter, content);
+            this.Formatter.Serialize(this.prefixingWriter, content);
 
             // Now go back and fill in the header with the actual content length.
             Utilities.Write(this.prefixingWriter.Prefix.Span, checked((int)this.prefixingWriter.Length));

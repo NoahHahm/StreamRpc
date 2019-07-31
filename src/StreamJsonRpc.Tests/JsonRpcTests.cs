@@ -73,12 +73,12 @@ public abstract class JsonRpcTests : TestBase
         var streams = Nerdbank.FullDuplexStream.CreateStreams();
         var receivingStream = streams.Item1;
         var server = new Server();
-        var rpc = JsonRpc.Attach(sendingStream: null, receivingStream: receivingStream, target: server);
+        var listener = JsonRpc.Attach(sendingStream: null, receivingStream: receivingStream, target: server);
         var disconnected = new AsyncManualResetEvent();
-        rpc.Disconnected += (s, e) => disconnected.Set();
+        listener.Disconnected += (s, e) => disconnected.Set();
 
-        var helperHandler = new HeaderDelimitedMessageHandler(sendingStream: streams.Item2, receivingStream: null);
-        await helperHandler.WriteAsync(
+        var sender = JsonRpc.Attach(streams.Item2);
+        await sender.MessageHandler.WriteAsync(
             new JsonRpcRequest
             {
                 Method = nameof(Server.NotificationMethod),
@@ -89,13 +89,13 @@ public abstract class JsonRpcTests : TestBase
         Assert.Equal("hello", await server.NotificationReceived.WithCancellation(this.TimeoutToken));
 
         // Any form of outbound transmission should be rejected.
-        await Assert.ThrowsAsync<InvalidOperationException>(() => rpc.NotifyAsync("foo"));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => rpc.InvokeAsync("foo"));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => listener.NotifyAsync("foo"));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => listener.InvokeAsync("foo"));
 
         Assert.False(disconnected.IsSet);
 
         // Receiving a request should forcibly terminate the stream.
-        await helperHandler.WriteAsync(
+        await sender.MessageHandler.WriteAsync(
             new JsonRpcRequest
             {
                 Id = 1,
