@@ -589,6 +589,18 @@ namespace StreamRpc
         }
 
         /// <summary>
+        /// Creates a JSON-RPC client proxy that conforms to the specified server interface.
+        /// </summary>
+        /// <param name="type">The interface that describes the functions available on the remote end.</param>
+        /// <param name="options">A set of customizations for how the client proxy is wired up. If <c>null</c>, default options will be used.</param>
+        /// <returns>An instance of the generated proxy.</returns>
+        public object Attach(Type type, JsonRpcProxyOptions options)
+        {
+            var proxyType = ProxyGeneration.Get(type.GetTypeInfo());
+            return Activator.CreateInstance(proxyType.AsType(), this, options ?? JsonRpcProxyOptions.Default);
+        }
+
+        /// <summary>
         /// Adds the specified target as possible object to invoke when incoming messages are received.  The target object
         /// should not inherit from each other and are invoked in the order which they are added.
         /// </summary>
