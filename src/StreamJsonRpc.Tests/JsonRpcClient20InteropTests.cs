@@ -26,11 +26,11 @@ public class JsonRpcClient20InteropTests : InteropTestBase
     {
         this.clientRpc = new JsonRpc(this.messageHandler)
         {
-            TraceSource =
-            {
-                Switch = { Level = SourceLevels.Verbose },
-                Listeners = { new XunitTraceListener(logger) },
-            },
+            TraceSource = new TraceSource(nameof(JsonRpcClient20InteropTests))
+                {
+                    Switch = { Level = SourceLevels.Verbose },
+                    Listeners = { new XunitTraceListener(logger) },
+                },
         };
         this.clientRpc.StartListening();
     }

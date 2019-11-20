@@ -35,7 +35,9 @@ public class JsonRpcMethodAttributeTests : TestBase
         this.clientStream = streams.Item2;
 
         this.serverRpc = JsonRpc.Attach(this.serverStream, this.server);
+        this.serverRpc.Disconnected += (sender, args) => args.Exception?.Rethrow();
         this.clientRpc = JsonRpc.Attach(this.clientStream);
+        this.clientRpc.Disconnected += (sender, args) => args.Exception?.Rethrow();
     }
 
     [Fact]

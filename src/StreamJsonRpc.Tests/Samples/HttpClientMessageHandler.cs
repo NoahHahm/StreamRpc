@@ -181,7 +181,10 @@ public class HttpClientMessageHandler : IJsonRpcMessageHandler
             }
             else
             {
-                this.TraceSource.TraceEvent(TraceEventType.Error, (int)TraceEvents.HttpErrorStatusCodeReceived, "Received HTTP {0} {1} response to JSON-RPC request for method \"{2}\".", (int)response.StatusCode, response.StatusCode, contentAsRequest.Method);
+                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Error) ?? false)
+                {
+                    this.TraceSource.TraceEvent(TraceEventType.Error, (int)TraceEvents.HttpErrorStatusCodeReceived, "Received HTTP {0} {1} response to JSON-RPC request for method \"{2}\".", (int)response.StatusCode, response.StatusCode, contentAsRequest.Method);
+                }
             }
 
             // The response is expected to be a success code, or an error code with a content-type that we can deserialize.

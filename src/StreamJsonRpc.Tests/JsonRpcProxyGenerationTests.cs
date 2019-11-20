@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ public class JsonRpcProxyGenerationTests : TestBase
 
         this.server = new Server();
         this.serverRpc = JsonRpc.Attach(this.serverStream, this.server);
+        this.serverRpc.Disconnected += (sender, args) => args.Exception?.Rethrow();
     }
 
     public interface IServer
@@ -287,7 +289,8 @@ public class JsonRpcProxyGenerationTests : TestBase
         var server = new Server();
         var serverRpc = JsonRpc.Attach(streams.Item2, server);
 
-        var clientRpc = new JsonRpc(streams.Item1, streams.Item1);
+        var clientRpc = new JsonRpc(streams.Item1, streams.Item1) { TraceSource = new TraceSource(nameof(JsonRpc)) };
+
         var client1 = clientRpc.Attach<IServer>();
         var client2 = clientRpc.Attach<IServer2>();
         clientRpc.StartListening();
