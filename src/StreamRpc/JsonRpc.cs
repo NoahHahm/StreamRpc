@@ -106,7 +106,7 @@ namespace StreamRpc
         /// Backing field for the <see cref="TraceSource"/> property.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private TraceSource traceSource = new TraceSource(nameof(JsonRpc));
+        private TraceSource traceSource;
 
         /// <summary>
         /// Backing field for the <see cref="CancelLocallyInvokedMethodsWhenConnectionIsClosed"/> property.
@@ -638,7 +638,7 @@ namespace StreamRpc
                             }
                             else
                             {
-                                if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                                 {
                                     this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.LocalMethodAdded, "Skipping local RPC method \"{0}\" -> {1} because a method with a colliding signature has already been added.", rpcMethodName, newMethod);
                                 }
@@ -667,7 +667,7 @@ namespace StreamRpc
                                 this.eventReceivers = new List<EventReceiver>();
                             }
 
-                            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                             {
                                 this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.LocalEventListenerAdded, "Listening for events from {0}.{1} to raise notification.", target.GetType().FullName, evt.Name);
                             }
@@ -1156,7 +1156,7 @@ namespace StreamRpc
                         {
                             if (response == null)
                             {
-                                if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Warning))
+                                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Warning) ?? false)
                                 {
                                     this.TraceSource.TraceEvent(TraceEventType.Warning, (int)TraceEvents.RequestAbandonedByRemote, "Aborting pending request \"{0}\" because the connection was lost.", id);
                                 }
@@ -1430,12 +1430,30 @@ namespace StreamRpc
             return false;
         }
 
+        private static JsonRpc ListenIfCanRead(JsonRpc rpc)
+        {
+            try
+            {
+                if (rpc.MessageHandler.CanRead)
+                {
+                    rpc.StartListening();
+                }
+
+                return rpc;
+            }
+            catch
+            {
+                rpc.Dispose();
+                throw;
+            }
+        }
+
         private JsonRpcError CreateError(JsonRpcRequest request, Exception exception)
         {
             Requires.NotNull(request, nameof(request));
             Requires.NotNull(exception, nameof(exception));
 
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Error))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Error) ?? false)
             {
                 this.TraceSource.TraceEvent(TraceEventType.Error, (int)TraceEvents.LocalInvocationError, "Exception thrown from request \"{0}\" for method {1}: {2}", request.Id, request.Method, exception);
                 this.TraceSource.TraceData(TraceEventType.Error, (int)TraceEvents.LocalInvocationError, exception, request.Method, request.Id, request.Arguments);
@@ -1447,7 +1465,7 @@ namespace StreamRpc
             if (errorDetails == null)
             {
                 string errorMessage = $"The {this.GetType().Name}.{nameof(this.CreateErrorDetails)} method returned null, which is not allowed.";
-                if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Critical))
+                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Critical) ?? false)
                 {
                     this.TraceSource.TraceEvent(TraceEventType.Critical, (int)TraceEvents.LocalContractViolation, errorMessage);
                 }
@@ -1480,7 +1498,7 @@ namespace StreamRpc
                 {
                     if (this.targetRequestMethodToClrMethodMap.Count == 0)
                     {
-                        if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Warning))
+                        if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Warning) ?? false)
                         {
                             this.TraceSource.TraceEvent(TraceEventType.Warning, (int)TraceEvents.RequestWithoutMatchingTarget, "No target methods are registered. \"{0}\" will not be invoked.", request.Method);
                         }
@@ -1505,7 +1523,7 @@ namespace StreamRpc
 
                 if (targetMethod == null)
                 {
-                    if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Warning))
+                    if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Warning) ?? false)
                     {
                         this.TraceSource.TraceEvent(TraceEventType.Warning, (int)TraceEvents.RequestWithoutMatchingTarget, "No target methods are registered that match \"{0}\".", request.Method);
                     }
@@ -1522,7 +1540,7 @@ namespace StreamRpc
                 }
                 else if (!targetMethod.IsFound)
                 {
-                    if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Warning))
+                    if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Warning) ?? false)
                     {
                         this.TraceSource.TraceEvent(TraceEventType.Warning, (int)TraceEvents.RequestWithoutMatchingTarget, "Invocation of \"{0}\" cannot occur because arguments do not match any registered target methods.", request.Method);
                     }
@@ -1554,7 +1572,7 @@ namespace StreamRpc
                     }
                 }
 
-                if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                 {
                     this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.LocalInvocation, "Invoking {0}", targetMethod);
                 }
@@ -1756,7 +1774,7 @@ namespace StreamRpc
                 TraceEventType eventType = (eventArgs.Reason == DisconnectedReason.LocallyDisposed || eventArgs.Reason == DisconnectedReason.RemotePartyTerminated)
                     ? TraceEventType.Information
                     : TraceEventType.Critical;
-                if (this.TraceSource.Switch.ShouldTrace(eventType))
+                if (this.TraceSource?.Switch.ShouldTrace(eventType) ?? false)
                 {
                     this.TraceSource.TraceEvent(eventType, (int)TraceEvents.Closed, "Connection closing ({0}: {1}). {2}", eventArgs.Reason, eventArgs.Description, eventArgs.Exception);
                 }
@@ -1810,7 +1828,10 @@ namespace StreamRpc
 
             try
             {
-                this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.ListeningStarted, "Listening started.");
+                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
+                {
+                    this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.ListeningStarted, "Listening started.");
+                }
 
                 while (!this.IsDisposed && !this.DisconnectedToken.IsCancellationRequested)
                 {
@@ -1862,7 +1883,7 @@ namespace StreamRpc
             {
                 if (rpc is JsonRpcRequest request)
                 {
-                    if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                    if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                     {
                         if (request.IsResponseExpected)
                         {
@@ -1921,7 +1942,7 @@ namespace StreamRpc
                         }
                     }
 
-                    if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                    if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                     {
                         if (resultOrError is JsonRpcResult result)
                         {
@@ -1966,7 +1987,7 @@ namespace StreamRpc
 
             if (request.TryGetArgumentByNameOrIndex("id", -1, null, out object id))
             {
-                if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+                if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
                 {
                     this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.ReceivedCancellation, "Cancellation request received for \"{0}\".", id);
                 }
@@ -2050,7 +2071,7 @@ namespace StreamRpc
         {
             Requires.NotNullOrEmpty(rpcMethodName, nameof(rpcMethodName));
 
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
             {
                 this.TraceSource.TraceEvent(TraceEventType.Information, (int)TraceEvents.LocalMethodAdded, "Added local RPC method \"{0}\" -> {1}", rpcMethodName, targetMethod);
             }
@@ -2058,12 +2079,12 @@ namespace StreamRpc
 
         private void TraceMessageSent(JsonRpcMessage message)
         {
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
             {
                 this.TraceSource.TraceData(TraceEventType.Information, (int)TraceEvents.MessageSent, message);
             }
 
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Verbose))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Verbose) ?? false)
             {
                 this.TraceSource.TraceEvent(TraceEventType.Verbose, (int)TraceEvents.MessageSent, "Sent: {0}", this.GetMessageJson(message));
             }
@@ -2071,12 +2092,12 @@ namespace StreamRpc
 
         private void TraceMessageReceived(JsonRpcMessage message)
         {
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Information))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Information) ?? false)
             {
                 this.TraceSource.TraceData(TraceEventType.Information, (int)TraceEvents.MessageReceived, message);
             }
 
-            if (this.TraceSource.Switch.ShouldTrace(TraceEventType.Verbose))
+            if (this.TraceSource?.Switch.ShouldTrace(TraceEventType.Verbose) ?? false)
             {
                 this.TraceSource.TraceEvent(TraceEventType.Verbose, (int)TraceEvents.MessageReceived, "Received: {0}", this.GetMessageJson(message));
             }
@@ -2136,24 +2157,6 @@ namespace StreamRpc
         private void ThrowIfConfigurationLocked()
         {
             Verify.Operation(!this.HasListeningStarted || this.AllowModificationWhileListening, Resources.MustNotBeListening);
-        }
-
-        private static JsonRpc ListenIfCanRead(JsonRpc rpc)
-        {
-            try
-            {
-                if (rpc.MessageHandler.CanRead)
-                {
-                    rpc.StartListening();
-                }
-
-                return rpc;
-            }
-            catch
-            {
-                rpc.Dispose();
-                throw;
-            }
         }
 
         internal class MethodNameMap

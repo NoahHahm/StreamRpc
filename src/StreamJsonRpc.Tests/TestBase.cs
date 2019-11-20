@@ -5,11 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+
+public static class Extensions
+{
+    public static void Rethrow(this Exception exception)
+    {
+        ExceptionDispatchInfo.Capture(exception).Throw();
+    }
+}
 
 public abstract class TestBase : IDisposable
 {

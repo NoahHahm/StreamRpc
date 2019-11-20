@@ -40,7 +40,7 @@ public class SpecialCaseTests : TestBase
         var pair = FullDuplexStream.CreatePair();
         var serverRpc = new JsonRpc(pair.Item1)
         {
-            TraceSource =
+            TraceSource = new TraceSource(nameof(JsonRpc))
             {
                 Switch = { Level = SourceLevels.All },
                 Listeners = { new ThrowingTraceListener() },
