@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
@@ -563,6 +564,16 @@ public class JsonRpcProxyGenerationTests : TestBase
 
         var clientRpc = JsonRpc.Attach<IServerWithValueTasks>(streams.Item1);
         await clientRpc.DoSomethingValueAsync();
+    }
+
+    [Fact]
+    public void ProxyCanBeSavedAndReused()
+    {
+        var streams = FullDuplexStream.CreateStreams();
+        var proxy = JsonRpc.GenerateProxyType<IServer>();
+        //var tmpAssembly = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), ".dll");
+        //AssemblyBuilder.Save(tmpAssembly, )
+        Assert.True((object)proxy is TypeBuilder);
     }
 
     public class EmptyClass
