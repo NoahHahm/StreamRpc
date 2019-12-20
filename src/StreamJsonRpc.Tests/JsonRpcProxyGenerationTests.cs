@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
@@ -133,11 +134,11 @@ public class JsonRpcProxyGenerationTests : TestBase
     }
 
     [Fact]
-    public void ProxyTypeIsReused()
+    public void ProxyTypeIsNotReusedAcrossDifferentJsonRpcInstances()
     {
         var streams = FullDuplexStream.CreateStreams();
         var clientRpc = JsonRpc.Attach<IServerDerived>(streams.Item1);
-        Assert.IsType(this.clientRpc.GetType(), clientRpc);
+        Assert.IsNotType(this.clientRpc.GetType(), clientRpc);
     }
 
     [Fact]
@@ -570,10 +571,15 @@ public class JsonRpcProxyGenerationTests : TestBase
     public void ProxyCanBeSavedAndReused()
     {
         var streams = FullDuplexStream.CreateStreams();
-        var proxy = JsonRpc.GenerateProxyType<IServer>();
-        //var tmpAssembly = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), ".dll");
-        //AssemblyBuilder.Save(tmpAssembly, )
-        Assert.True((object)proxy is TypeBuilder);
+        var rpc = new JsonRpc(streams.Item1);
+        var proxyType = rpc.ProxyGenerator.GetProxyBuilder<IServerWithValueTasks>().GetTypeInfo();
+        var generatedType1 = rpc.Attach<IServerWithValueTasks>();
+        Assert.IsType(proxyType.AsType(), generatedType1.GetType());
+
+        var rpc2 = new JsonRpc(streams.Item2);
+        rpc2.ProxyGenerator.Add<IServerWithValueTasks>(proxyType);
+        var generatedType2 = rpc.Attach<IServerWithValueTasks>();
+        Assert.IsType(proxyType.AsType(), generatedType2.GetType());
     }
 
     public class EmptyClass

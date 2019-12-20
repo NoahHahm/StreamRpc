@@ -50,11 +50,7 @@ namespace StreamRpc
         /// </summary>
         public ProxyGenerator()
         {
-#if SaveAssembly
-            this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName($"rpcProxies_{Guid.NewGuid()}"), AssemblyBuilderAccess.RunAndSave);
-#else
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName($"rpcProxies_{Guid.NewGuid()}"), AssemblyBuilderAccess.RunAndCollect);
-#endif
             this.proxyModuleBuilder = this.assemblyBuilder.DefineDynamicModule("rpcProxies");
         }
 
@@ -64,28 +60,45 @@ namespace StreamRpc
         public string Name => this.proxyModuleBuilder.ScopeName;
 
         /// <summary>
-        /// Adds a type to the dynamic assembly.
+        /// Adds a pregenerated type to the proxy type cache.
         /// </summary>
-        /// <typeparam name="T">The type to add.</typeparam>
-        /// <returns>The proxy generation instance.</returns>
-        public ProxyGenerator Add<T>()
+        /// <typeparam name="T">The interface that describes the functions available on the remote end.</typeparam>
+        /// <param name="generatedType">Then generated type.</param>
+        public void Add<T>(TypeInfo generatedType) => Add(typeof(T).GetTypeInfo(), generatedType);
+
+        /// <summary>
+        /// Adds a pregenerated type to the proxy type cache.
+        /// </summary>
+        /// <param name="serviceInterface">The interface that describes the functions available on the remote end.</param>
+        /// <param name="generatedType">Then generated type.</param>
+        public void Add(TypeInfo serviceInterface, TypeInfo generatedType)
         {
-            GetProxyBuilder(typeof(T).GetTypeInfo());
-            return this;
+            lock (this.generatedProxiesByInterface)
+            {
+                this.generatedProxiesByInterface.Add(serviceInterface, generatedType);
+            }
         }
 
         /// <summary>
-        /// Adds a type to the dynamic assembly.
+        /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
         /// </summary>
-        /// <param name="type">The type to add.</param>
-        /// <returns>The proxy generation instance.</returns>
-        public ProxyGenerator Add(Type type)
-        {
-            GetProxyBuilder(type.GetTypeInfo());
-            return this;
-        }
+        /// <typeparam name="T">The interface that describes the functions available on the remote end.</typeparam>
+        /// <returns>The type builder for this type.</returns>
+        public TypeBuilder GetProxyBuilder<T>() => GetProxyBuilder(typeof(T).GetTypeInfo());
 
-        internal TypeBuilder GetProxyBuilder(TypeInfo serviceInterface)
+        /// <summary>
+        /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
+        /// </summary>
+        /// <param name="type">The interface that describes the functions available on the remote end.</param>
+        /// <returns>The type builder for this type.</returns>
+        public TypeBuilder GetProxyBuilder(Type type) => GetProxyBuilder(type.GetTypeInfo());
+
+        /// <summary>
+        /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
+        /// </summary>
+        /// <param name="serviceInterface">The interface that describes the functions available on the remote end.</param>
+        /// <returns>The type builder for this type.</returns>
+        public TypeBuilder GetProxyBuilder(TypeInfo serviceInterface)
         {
             Requires.NotNull(serviceInterface, nameof(serviceInterface));
             VerifySupported(serviceInterface.IsInterface, Resources.ClientProxyTypeArgumentMustBeAnInterface, serviceInterface);
@@ -109,9 +122,23 @@ namespace StreamRpc
         /// <summary>
         /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
         /// </summary>
+        /// <typeparam name="T">The interface that describes the functions available on the remote end.</typeparam>
+        /// <returns>The generated type.</returns>
+        public TypeInfo Get<T>() => Get(typeof(T).GetTypeInfo());
+
+        /// <summary>
+        /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
+        /// </summary>
+        /// <param name="type">The interface that describes the functions available on the remote end.</param>
+        /// <returns>The generated type.</returns>
+        public TypeInfo Get(Type type) => Get(type.GetTypeInfo());
+
+        /// <summary>
+        /// Gets a dynamically generated type that implements a given interface in terms of a <see cref="JsonRpc"/> instance.
+        /// </summary>
         /// <param name="serviceInterface">The interface that describes the RPC contract, and that the client proxy should implement.</param>
         /// <returns>The generated type.</returns>
-        internal TypeInfo Get(TypeInfo serviceInterface)
+        public TypeInfo Get(TypeInfo serviceInterface)
         {
             Requires.NotNull(serviceInterface, nameof(serviceInterface));
             VerifySupported(serviceInterface.IsInterface, Resources.ClientProxyTypeArgumentMustBeAnInterface, serviceInterface);
