@@ -60,6 +60,10 @@
     <ProjectReference Include="..\StreamRpc\StreamRpc.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\StreamJsonRpc\StreamRpc.Json.csproj" />
+    <ProjectReference Include="..\StreamRpc\StreamRpc.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 </Project>
